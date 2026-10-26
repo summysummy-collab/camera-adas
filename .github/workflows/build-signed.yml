@@ -3,12 +3,17 @@ name: build-ios-signed
 # 用真正的开发者证书签名出可直装的 IPA（Development 描述文件，一年有效）。
 # 触发：仓库 Actions 页面点 "Run workflow"，或推送改动（默认手动，避免每次白跑）。
 on:
+  push:
+    branches: [main, master]
   workflow_dispatch:
     inputs:
       note:
         description: '备注（随便写，仅用于区分运行）'
         required: false
         default: 'signed build'
+
+permissions:
+  contents: write
 
 jobs:
   ipa:
@@ -147,3 +152,28 @@ jobs:
           name: AdasIOS-signed-ipa-${{ matrix.os }}
           path: ${{ env.IPA_NAME }}
           if-no-files-found: error
+
+      # ---------- 6. 把 IPA 推回 ipa-dist 分支（本机 API 不可达，用 git 取包） ----------
+      - name: Publish IPA to ipa-dist branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          D=$(mktemp -d)
+          cp "$IPA_NAME" "$D/"
+          {
+            echo "sha=$GITHUB_SHA"
+            echo "run=$GITHUB_RUN_NUMBER"
+            echo "runner=${{ matrix.os }}"
+            echo "bundle=$BUNDLE_ID"
+            echo "ipa=$IPA_NAME"
+            date -u +"built_at=%Y-%m-%dT%H:%M:%SZ"
+          } > "$D/BUILD.txt"
+          cd "$D"
+          git init -q -b "ipa-dist-${{ matrix.os }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "signed ipa ${GITHUB_SHA::7} (${GITHUB_RUN_NUMBER})"
+          git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "ipa-dist-${{ matrix.os }}:ipa-dist-${{ matrix.os }}"
+          echo "已推送 ipa-dist-${{ matrix.os }} 分支"

@@ -1,8 +1,8 @@
 name: build-ios
 
 on:
-  push:
-    branches: [main, master]
+  # 只在需要单独验证无签名产物时手动跑；日常出包走 build-signed.yml（推送 main 即触发），
+  # 避免两个 workflow 抢 macOS 队列容量
   workflow_dispatch:
 
 jobs:
