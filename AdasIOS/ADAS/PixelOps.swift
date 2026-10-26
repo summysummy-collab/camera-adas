@@ -93,7 +93,8 @@ func classifyLight(_ img: FrameBuf, _ box: [Double]) -> (LightColor, Double) {
         for x in x1..<x2 {
             let (b, g, r) = img.bgra(x, y)
             let (hh, s, v) = rgb2hsv(Double(r), Double(g), Double(b))
-            if v > 0.55 && s > 0.27 {
+            // v/s 门限比网页版略放松：白天红灯亮度只有 0.5 上下，太严会一直判不出颜色
+            if v > 0.45 && s > 0.25 {
                 n += 1
                 if hh < 15 || hh > 345 { cnt[.red]! += 1 }
                 else if hh >= 15 && hh < 55 { cnt[.yellow]! += 1 }
@@ -101,10 +102,10 @@ func classifyLight(_ img: FrameBuf, _ box: [Double]) -> (LightColor, Double) {
             }
         }
     }
-    if n < max(8, Int(0.02 * Double((x2 - x1) * (y2 - y1)))) { return (.unknown, 0) }
+    if n < max(6, Int(0.015 * Double((x2 - x1) * (y2 - y1)))) { return (.unknown, 0) }
     var best = LightColor.unknown
     var bc = 0
     for (k, c) in cnt where c > bc { best = k; bc = c }
     let conf = Double(bc) / Double(n)
-    return conf < 0.45 ? (.unknown, conf) : (best, conf)
+    return conf < 0.40 ? (.unknown, conf) : (best, conf)
 }

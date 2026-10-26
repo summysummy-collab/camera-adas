@@ -8,6 +8,7 @@ struct HudView: View {
     let gpsOk: Bool
     let gpsSpeed: Double
     let gpsSrc: String
+    var debugLine: String = ""
 
     var body: some View {
         GeometryReader { geo in
@@ -76,6 +77,23 @@ struct HudView: View {
                 .background(RoundedRectangle(cornerRadius: 6).fill(Color.black.opacity(0.45)))
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
                 .padding(8)
+
+                // 诊断行（右下角小字）：用来定位"为什么没报"
+                if !debugLine.isEmpty {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(debugLine)
+                        if scene.fcwRatio.isFinite {
+                            Text(String(format: "FCW 实际%.0fm / 所需%.0fm = %.2f",
+                                        scene.leadDist, scene.fcwNeedM, scene.fcwRatio))
+                        }
+                    }
+                    .font(.system(size: 9, design: .monospaced))
+                    .foregroundColor(.white.opacity(0.75))
+                    .padding(5)
+                    .background(RoundedRectangle(cornerRadius: 5).fill(Color.black.opacity(0.42)))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .padding(8)
+                }
             }
         }
         .allowsHitTesting(false)

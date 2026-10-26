@@ -1,15 +1,12 @@
-HTTP/1.1 200 OK
-Date: Mon, 26 Oct 2026 05:02:40 GMT
-Content-Type: application/json; charset=utf-8
-Content-Length: 1722
-Cache-Control: private, max-age=60, s-maxage=60
-Vary: Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
-ETag: "ead59c8f1b10ea66a2cbc0f561640144cc5a8dfd8f64ffb6f3e76e91faf0f6cf"
-Last-Modified: Sun, 25 Oct 2026 04:01:41 GMT
+HTTP/1.1 204 No Content
+Date: Mon, 26 Oct 2026 05:16:01 GMT
 X-OAuth-Scopes: admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key, admin:repo_hook, admin:ssh_signing_key, audit_log, codespace, copilot, delete:packages, delete_repo, gist, notifications, project, repo, user, workflow, write:discussion, write:network_configurations, write:packages
 X-Accepted-OAuth-Scopes: 
 github-authentication-token-expiration: 2027-01-24 05:02:19 UTC
 X-GitHub-Media-Type: github.v3; format=json
+Deprecation: Tue, 10 Mar 2026 00:00:00 GMT
+Sunset: Fri, 10 Mar 2028 00:00:00 GMT
+Link: <https://docs.github.com/en/rest/about-the-rest-api/api-versions>; rel="deprecation"; type="text/html"
 x-github-api-version-selected: 2022-11-28
 Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning
 Access-Control-Allow-Origin: *
@@ -19,12 +16,13 @@ X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
 Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
 Content-Security-Policy: default-src 'none'
+Vary: Accept-Encoding, Accept, X-Requested-With
 Server: github.com
 X-RateLimit-Limit: 5000
-X-RateLimit-Remaining: 4994
-X-RateLimit-Reset: 1792992456
-X-RateLimit-Used: 6
+X-RateLimit-Remaining: 4982
+X-RateLimit-Reset: 1792992439
+X-RateLimit-Used: 18
 X-RateLimit-Resource: core
-X-GitHub-Request-Id: E63F:42255:EBE2E8:16837B3:6ADEDEEF
+X-GitHub-Request-Id: C2B5:3FD491:EE7AA2:16E3CA3:6ADEE210
 x-github-edge-region: southeastasia
 

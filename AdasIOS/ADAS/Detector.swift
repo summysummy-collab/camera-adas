@@ -15,8 +15,9 @@ final class Detector {
         0: "person", 1: "bicycle", 2: "car", 3: "motorcycle",
         5: "bus", 7: "truck", 9: "traffic light",
     ]
-    // 信号灯是小目标，置信度分布偏低，单独更宽阈值
-    static let CONF_BY_CLS: [Int: Double] = [9: 0.22]
+    // 信号灯是小目标，置信度分布偏低，单独更宽阈值；
+    // 后续还有"颜色投票 + 连续 2 帧确认"把关，所以阈值可以放得更松（提高召回）
+    static let CONF_BY_CLS: [Int: Double] = [9: 0.15]
 
     let model: MLModel
     let W: Int

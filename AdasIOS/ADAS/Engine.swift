@@ -14,6 +14,7 @@ final class Engine: ObservableObject {
     @Published var gpsSpeed: Double = 0
     @Published var gpsSrc = "none"
     @Published var running = false
+    @Published var debugLine = ""
 
     let camera = CameraManager()
     let speaker = AlertSpeaker()
@@ -25,6 +26,8 @@ final class Engine: ObservableObject {
     private var calib = Calib()
     private var lastFrameTs: Double = 0
     private var fpsEma: Double = 0
+    /// 当前帧的像素视图（尾灯判据复用，避免同一缓冲重复加锁）
+    private var curFrame: FrameBuf? = nil
 
     func start() throws {
         if detector == nil {
@@ -32,13 +35,14 @@ final class Engine: ObservableObject {
             detector = det
             inferMs = det.lastMs
         }
+        // ★ 关键：先把定标 fit 出来。Calib 是 struct，未 fit 时 fx/fy 还是初值 1，
+        //   任何依赖焦距的计算（红绿灯物理尺寸测距、横向速度 m/s）都会得出垃圾值。
+        calib.fit(Double(CameraManager.WS_W), Double(CameraManager.WS_H))
+
         rules = RulesEngine(calib: calib)
         rules?.tailRatioProvider = { [weak self] box in
-            guard let self = self, let pb = self.camera.workspace,
-                  let fb = FrameBuf(pb) else { return nil }
-            let r = redRatio(fb, box)
-            fb.finished(pb)
-            return r
+            guard let self = self, let fb = self.curFrame else { return nil }
+            return redRatio(fb, box)
         }
         camera.onFrame = { [weak self] ws, ts in
             self?.processFrame(ws, ts: ts)
@@ -70,7 +74,11 @@ final class Engine: ObservableObject {
         let tracks = tracker.update(dets)
 
         var fb: FrameBuf? = FrameBuf(ws)
-        defer { if let f = fb { f.finished(ws) } }
+        defer {
+            if let f = fb { f.finished(ws) }
+            curFrame = nil
+        }
+        curFrame = fb
 
         // 信号灯
         let tl = tracks.filter { $0.name == "traffic light" && $0.misses == 0 }
@@ -84,6 +92,14 @@ final class Engine: ObservableObject {
         let st = rules.update(tracks, ts, ctx)
 
         let fpsNow = fpsEma
+        let dbg = String(
+            format: "det %d · tl %d · 灯报 %d · GPS %@ %.1f a%+.1f · 前车 %@ 近%+.1f 加%+.1f 尾%.3f · 车%d",
+            dets.count, tl.count, lightReports.count,
+            location.ego.ok ? "ok" : "无",
+            location.ego.v, location.ego.a,
+            st.leadId == nil ? "无" : String(format: "%.0fm", st.leadDist),
+            st.leadClosing, st.leadRelAcc, st.tailRatio,
+            st.nTracks)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.scene = st
@@ -92,6 +108,7 @@ final class Engine: ObservableObject {
             self.gpsOk = self.location.ego.ok
             self.gpsSpeed = self.location.ego.v
             self.gpsSrc = self.location.ego.src
+            self.debugLine = dbg
             if let top = st.alerts.first {
                 self.speaker.speak(top, ts: ts)
             }

@@ -13,7 +13,8 @@ struct ContentView: View {
                 CameraPreview(session: engine.camera.session)
                     .ignoresSafeArea()
                 HudView(scene: engine.scene, fps: engine.fps, inferMs: engine.inferMs,
-                        gpsOk: engine.gpsOk, gpsSpeed: engine.gpsSpeed, gpsSrc: engine.gpsSrc)
+                        gpsOk: engine.gpsOk, gpsSpeed: engine.gpsSpeed, gpsSrc: engine.gpsSrc,
+                        debugLine: engine.debugLine)
                     .ignoresSafeArea()
                 // 停止按钮（右上角小圆点，避免行车时误触）
                 VStack {

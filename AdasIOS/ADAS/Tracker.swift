@@ -104,6 +104,28 @@ final class Track {
         let dt = ts[i1] - ts[i0]
         return dt <= 1e-3 ? 0 : (cxs[i1] - cxs[i0]) / dt
     }
+
+    /// 横向速度（**米/秒**，正 = 向右）。归一化像素速度 × 距离 / 焦距 = 物理横向速度，
+    /// 比归一化量纲可解释得多：插队车典型 0.5–2 m/s，旁车道车辆≈0。
+    func lateralMps(_ dist: Double, _ fx: Double, _ frameW: Double, windowS: Double = 0.6) -> Double {
+        guard dist.isFinite, dist > 0, fx > 1, frameW > 1 else { return 0 }
+        let n = ts.count
+        if n < 3 { return 0 }
+        let tEnd = ts[n - 1]
+        let i1 = n - 1
+        var i0 = -1
+        for i in 0..<n where ts[i] >= tEnd - windowS { i0 = i; break }
+        if i0 < 0 || i1 <= i0 { return 0 }
+        let dt = ts[i1] - ts[i0]
+        if dt <= 1e-3 { return 0 }
+        let dPx = (cxs[i1] - cxs[i0]) * frameW      // cxs 已按帧宽归一化
+        return dPx / dt * dist / fx
+    }
+
+    /// 轨迹第一帧的时间（用于判断"是不是刚出现"）
+    var firstTs: Double { ts.first ?? 0 }
+    /// 已跟踪时长（秒）
+    func ageS(_ now: Double) -> Double { ts.isEmpty ? 0 : now - ts[0] }
 }
 
 final class IoUTracker {

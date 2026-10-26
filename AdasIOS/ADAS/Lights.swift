@@ -1,7 +1,7 @@
-// Lights.swift — 交通信号灯跟踪（移植 mobile/lights.js LightTracker v8）
+// Lights.swift — 交通信号灯跟踪（v1.1）
+// YOLO 检出灯箱 → 框内颜色投票 → 连续 2 帧同色确认 → 物理尺寸法测距
 import Foundation
 
-/// YOLO 检出灯箱 → 框内颜色投票 → 连续 2 帧同色确认 → 物理尺寸法测距
 final class LightTracker {
     struct Entry {
         let id: String
@@ -17,15 +17,23 @@ final class LightTracker {
     static let HOUSING_H_M = 1.0     // 灯箱（竖排三灯）典型物理高度，测距用
     static let CONFIRM_SAME = 2      // 连续同色多少帧才确认
     static let MAX_AGE_S = 1.0       // 轨迹消失多久后丢弃状态
-    static let MAX_DIST_M = 70.0     // 超出直接不报
+    static let MAX_DIST_M = 80.0     // 超出直接不报
+    static let MIN_DIST_M = 2.0
 
     private var map: [Int: Entry] = [:]
+    /// 诊断：本帧投过票但仍未确认的灯数量
+    private(set) var pendingCount = 0
 
     func reset() { map.removeAll() }
 
     /// tlTracks: tracker 里 name=="traffic light" 且 misses==0 的轨迹（工作区坐标）
     func update(_ tlTracks: [Track], _ img: FrameBuf, _ calib: Calib, _ ts: Double) -> [LightReport] {
         var out: [LightReport] = []
+        // ★ 定标必须按实际画面尺寸 fit 过才有意义（Calib 是 struct，外面传进来的可能是未 fit 的）
+        var c = calib
+        c.fit(Double(img.width), Double(img.height))
+
+        pendingCount = 0
         for tr in tlTracks {
             var e = map[tr.tid]
             if e == nil {
@@ -43,17 +51,22 @@ final class LightTracker {
                 e!.conf = conf
             }
 
-            // 距离：灯箱物理尺寸法 d = fy·H / 像素高（有界、不依赖俯仰标定）
-            let bh = max(4, tr.box.height)
-            let d = calib.fy * Self.HOUSING_H_M / bh
-            e!.dist = (d >= 3 && d <= Self.MAX_DIST_M) ? d : nil
+            // 距离：灯箱物理尺寸法 d = fy·H / 像素高（不依赖俯仰标定，地平线附近也稳）
+            let bh = max(3, tr.box.height)
+            let d = c.fy * Self.HOUSING_H_M / bh
+            e!.dist = (d >= Self.MIN_DIST_M && d <= Self.MAX_DIST_M) ? d : nil
             let xc = (tr.box.x1 + tr.box.x2) / 2
-            e!.xm = (e!.dist?.isFinite == true && e!.dist != nil)
-                ? ((xc - calib.cx) * e!.dist!) / calib.fx : nil
+            if let dd = e!.dist, c.fx > 1 {
+                e!.xm = (xc - c.cx) * dd / c.fx
+            } else {
+                e!.xm = nil
+            }
 
             if e!.hits >= Self.CONFIRM_SAME && e!.color != .unknown {
                 out.append(LightReport(id: e!.id, color: e!.color, conf: e!.conf,
                                        dist: e!.dist, xm: e!.xm, box: tr.box.arr))
+            } else {
+                pendingCount += 1
             }
         }
         map = map.filter { ts - $0.value.last <= Self.MAX_AGE_S }
