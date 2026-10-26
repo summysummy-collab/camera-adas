@@ -53,7 +53,7 @@ final class CameraManager: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
         // 0° 对应 landscapeRight（原生横屏），90° 才是竖屏。
         // 注意要在 commitConfiguration 之后设置，连接对象在那之后才稳定。
         if #available(iOS 17.0, *), let conn = dataOutput.connection(with: .video),
-           conn.isVideoRotationAngleSupported {
+           conn.isVideoRotationAngleSupported(0) {
             conn.videoRotationAngle = 0
         }
 
