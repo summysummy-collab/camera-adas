@@ -1,0 +1,6 @@
+sha=3c12c86ee0872854b2cae654744da367a6f320b1
+run=6
+runner=macos-15
+bundle=com.CameraAdas.Adas
+ipa=AdasIOS-Adas-signed.ipa
+built_at=2026-10-26T12:33:22Z
