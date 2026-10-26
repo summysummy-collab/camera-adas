@@ -1,0 +1,144 @@
+name: build-ios-signed
+
+# 用真正的开发者证书签名出可直装的 IPA（Development 描述文件，一年有效）。
+# 触发：仓库 Actions 页面点 "Run workflow"，或推送改动（默认手动，避免每次白跑）。
+on:
+  workflow_dispatch:
+    inputs:
+      note:
+        description: '备注（随便写，仅用于区分运行）'
+        required: false
+        default: 'signed build'
+
+jobs:
+  ipa:
+    runs-on: macos-14
+    env:
+      CERT_B64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+      P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+      PROFILE_B64: ${{ secrets.BUILD_PROFILE_BASE64 }}
+      KEYCHAIN_PASS: ${{ secrets.KEYCHAIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      # ---------- 1. 安装描述文件并读出关键信息 ----------
+      - name: Install provisioning profile
+        run: |
+          set -euo pipefail
+          PP=$RUNNER_TEMP/profile.mobileprovision
+          printf '%s' "$PROFILE_B64" | base64 -d > "$PP"
+          security cms -D -i "$PP" > "$RUNNER_TEMP/profile.plist"
+
+          PP_NAME=$(plutil -extract Name raw -o - "$RUNNER_TEMP/profile.plist")
+          PP_UUID=$(plutil -extract UUID raw -o - "$RUNNER_TEMP/profile.plist")
+          TEAM=$(plutil -extract TeamIdentifier.0 raw -o - "$RUNNER_TEMP/profile.plist")
+          APPID=$(plutil -extract Entitlements.application-identifier raw -o - "$RUNNER_TEMP/profile.plist")
+          EXPIRES=$(plutil -extract ExpirationDate raw -o - "$RUNNER_TEMP/profile.plist")
+          # application-identifier = <TEAMID>.<bundle id>，剥掉 Team 前缀就是 Bundle ID
+          BUNDLE_ID="${APPID#*.}"
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$PP" "$HOME/Library/MobileDevice/Provisioning Profiles/$PP_UUID.mobileprovision"
+
+          {
+            echo "PP_NAME=$PP_NAME"
+            echo "PP_UUID=$PP_UUID"
+            echo "TEAM=$TEAM"
+            echo "BUNDLE_ID=$BUNDLE_ID"
+          } >> "$GITHUB_ENV"
+
+          echo "描述文件: $PP_NAME"
+          echo "UUID     : $PP_UUID"
+          echo "Team ID  : $TEAM"
+          echo "Bundle ID: $BUNDLE_ID"
+          echo "有效期至 : $EXPIRES"
+
+      # ---------- 2. 导入证书到临时钥匙串 ----------
+      - name: Import signing certificate
+        run: |
+          set -euo pipefail
+          CERT=$RUNNER_TEMP/cert.p12
+          KC=$RUNNER_TEMP/signing.keychain-db
+          printf '%s' "$CERT_B64" | base64 -d > "$CERT"
+          security create-keychain -p "$KEYCHAIN_PASS" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p "$KEYCHAIN_PASS" "$KC"
+          security import "$CERT" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KC"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASS" "$KC"
+          security list-keychain -d user -s "$KC" login.keychain-db
+          echo "---- 可用签名身份 ----"
+          security find-identity -v -p codesigning "$KC"
+
+      # ---------- 3. 编译（先不签，签名自己来，避免 Xcode 签名玄学） ----------
+      - name: Build unsigned payload
+        run: |
+          set -euo pipefail
+          xcodebuild -project AdasIOS.xcodeproj -scheme AdasIOS \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build
+
+      # ---------- 4. 嵌入描述文件 + 用证书重签 ----------
+      - name: Codesign
+        run: |
+          set -euo pipefail
+          APP=build/Build/Products/Release-iphoneos/AdasIOS.app
+          PP="$HOME/Library/MobileDevice/Provisioning Profiles/$PP_UUID.mobileprovision"
+
+          # 描述文件里的 Entitlements 直接拿来当签名权限（含 get-task-allow、team id）
+          plutil -extract Entitlements xml1 -o "$RUNNER_TEMP/entitlements.plist" \
+                 "$RUNNER_TEMP/profile.plist"
+          cp "$PP" "$APP/embedded.mobileprovision"
+
+          IDENTITY=$(security find-identity -v -p codesigning "$RUNNER_TEMP/signing.keychain-db" \
+                     | awk -F'"' '/"Apple Development|iPhone Developer/{print $2; exit}')
+          if [ -z "${IDENTITY:-}" ]; then
+            echo "::error::钥匙串里没有可用的 Apple Development / iPhone Developer 证书"
+            security find-identity -v -p codesigning "$RUNNER_TEMP/signing.keychain-db"
+            exit 1
+          fi
+          echo "使用身份: $IDENTITY"
+
+          # 由内向外签（本工程无 framework，先留着以防后续加法）
+          find "$APP" -name "*.framework" -maxdepth 3 -print0 2>/dev/null | \
+            while IFS= read -r -d '' fw; do
+              codesign -f -s "$IDENTITY" --timestamp=none "$fw"
+            done || true
+          find "$APP" -name "*.dylib" -print0 2>/dev/null | \
+            while IFS= read -r -d '' dy; do
+              codesign -f -s "$IDENTITY" --timestamp=none "$dy"
+            done || true
+
+          codesign -f -s "$IDENTITY" --timestamp=none \
+                   --entitlements "$RUNNER_TEMP/entitlements.plist" "$APP"
+
+          echo "---- 签名结果 ----"
+          codesign -dvvv "$APP" 2>&1 | head -20
+          codesign --verify --deep --strict --verbose=2 "$APP"
+
+      # ---------- 5. 打包上传 ----------
+      - name: Package signed IPA
+        run: |
+          set -euo pipefail
+          APP=build/Build/Products/Release-iphoneos/AdasIOS.app
+          NAME="AdasIOS-${BUNDLE_ID##*.}-signed.ipa"
+          rm -rf Payload && mkdir -p Payload
+          cp -R "$APP" Payload/
+          zip -qry "$NAME" Payload
+          ls -lh "$NAME"
+          echo "IPA_NAME=$NAME" >> "$GITHUB_ENV"
+          # 自检：ipa 里必须能看到 embedded.mobileprovision
+          unzip -l "$NAME" | grep -E "embedded.mobileprovision|AdasIOS.app/AdasIOS$"
+
+      - name: Upload signed IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AdasIOS-signed-ipa
+          path: ${{ env.IPA_NAME }}
+          if-no-files-found: error
