@@ -46,10 +46,16 @@ final class CameraManager: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
                           userInfo: [NSLocalizedDescriptionKey: "无法添加视频输出"])
         }
         session.addOutput(dataOutput)
-        if let conn = dataOutput.connection(with: .video), conn.isVideoOrientationSupported {
-            conn.videoOrientation = .landscapeRight
-        }
         session.commitConfiguration()
+
+        // 输出方向：不做旋转，直接取传感器原生横屏画面（1280x720），与网页版标定一致。
+        // videoOrientation 在新 SDK 已废弃/移除，统一用 videoRotationAngle（iOS 17+）：
+        // 0° 对应 landscapeRight（原生横屏），90° 才是竖屏。
+        // 注意要在 commitConfiguration 之后设置，连接对象在那之后才稳定。
+        if #available(iOS 17.0, *), let conn = dataOutput.connection(with: .video),
+           conn.isVideoRotationAngleSupported {
+            conn.videoRotationAngle = 0
+        }
 
         allocateWorkspace()
         session.startRunning()
@@ -73,7 +79,7 @@ final class CameraManager: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
         scaleDst.width = vImagePixelCount(Self.WS_W)
         scaleDst.height = vImagePixelCount(Self.CONTENT_H)
         scaleDst.rowBytes = stride
-        scaleDst.data = base + stride * Self.PAD
+        scaleDst.data = UnsafeMutableRawPointer(base + stride * Self.PAD)
         CVPixelBufferUnlockBaseAddress(workspace, [])
     }
 
@@ -87,7 +93,7 @@ final class CameraManager: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
         srcBuf.width = vImagePixelCount(CVPixelBufferGetWidth(src))
         srcBuf.height = vImagePixelCount(CVPixelBufferGetHeight(src))
         srcBuf.rowBytes = CVPixelBufferGetBytesPerRow(src)
-        srcBuf.data = CVPixelBufferGetBaseAddress(src)
+        srcBuf.data = CVPixelBufferGetBaseAddress(src)!
         vImageScale_ARGB8888(&srcBuf, &scaleDst, nil, vImage_Flags(kvImageHighQualityResampling))
         onFrame?(workspace, ts)
     }

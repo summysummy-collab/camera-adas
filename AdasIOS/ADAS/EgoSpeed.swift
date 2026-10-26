@@ -83,7 +83,7 @@ final class EgoSpeed {
 
     func haversine(_ lat1: Double, _ lon1: Double, _ lat2: Double, _ lon2: Double) -> Double {
         let r = 6_371_000.0
-        let p = .pi / 180
+        let p = Double.pi / 180
         let dLat = (lat2 - lat1) * p, dLon = (lon2 - lon1) * p
         let h = pow(sin(dLat / 2), 2) + cos(lat1 * p) * cos(lat2 * p) * pow(sin(dLon / 2), 2)
         return 2 * r * asin(min(1, sqrt(h)))

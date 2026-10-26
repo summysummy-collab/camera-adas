@@ -4,7 +4,8 @@ import CoreVideo
 import CoreML
 import QuartzCore
 
-@MainActor
+/// 主循环编排。注意：本类**不加 @MainActor** —— processFrame 跑在相机队列上，
+/// 只有对外发布状态时才切回主线程（见 processFrame 末尾的 DispatchQueue.main.async）。
 final class Engine: ObservableObject {
     @Published var scene = SceneState()
     @Published var fps: Double = 0
@@ -55,7 +56,7 @@ final class Engine: ObservableObject {
     }
 
     /// 相机队列上执行（非主线程）
-    nonisolated private func processFrame(_ ws: CVPixelBuffer, ts: Double) {
+    private func processFrame(_ ws: CVPixelBuffer, ts: Double) {
         guard let detector = detector, let rules = rules else { return }
 
         // fps
@@ -82,9 +83,11 @@ final class Engine: ObservableObject {
                            ego: location.ego, lights: lightReports)
         let st = rules.update(tracks, ts, ctx)
 
-        Task { @MainActor in
+        let fpsNow = fpsEma
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
             self.scene = st
-            self.fps = self.fpsEma
+            self.fps = fpsNow
             self.inferMs = detector.lastMs
             self.gpsOk = self.location.ego.ok
             self.gpsSpeed = self.location.ego.v

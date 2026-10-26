@@ -35,8 +35,8 @@ final class Detector {
         self.model = try MLModel(contentsOf: url, configuration: cfg)
         let inputDesc = model.modelDescription.inputDescriptionsByName["images"]!
         let constraint = inputDesc.imageConstraint!
-        self.W = constraint.pixelWidth
-        self.H = constraint.pixelHeight
+        self.W = constraint.pixelsWide
+        self.H = constraint.pixelsHigh
         self.conf = conf
     }
 
