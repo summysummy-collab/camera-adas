@@ -12,7 +12,12 @@ on:
 
 jobs:
   ipa:
-    runs-on: macos-13
+    # 双队列并行：GitHub hosted macOS 经常容量不足，哪个池先给机器就用哪个出包
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-13]
+    runs-on: ${{ matrix.os }}
     env:
       CERT_B64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
       P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
@@ -139,6 +144,6 @@ jobs:
       - name: Upload signed IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AdasIOS-signed-ipa
+          name: AdasIOS-signed-ipa-${{ matrix.os }}
           path: ${{ env.IPA_NAME }}
           if-no-files-found: error
