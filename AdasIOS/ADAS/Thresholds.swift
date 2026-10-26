@@ -11,9 +11,11 @@ struct Thresholds {
     var maxRelSpeed = 25.0
     var minTrackFrames = 4
     var minValid = 2.5
-    var maxValid = 120.0
+    var maxValid = 110.0
     var conf = 0.35
     var lowSpeedMps = 1.5
+    /// 测距残余系统偏差的手动缩放（标定页可调，1.0 = 不修正）
+    var distScale = 1.0
 
     // ---- 前车刹车（三路证据融合，任一成立即可）----
     var brakeClosingMps = 1.0       // 相对接近速度下限（m/s）

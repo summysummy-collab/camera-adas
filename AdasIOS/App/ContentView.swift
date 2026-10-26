@@ -6,6 +6,9 @@ struct ContentView: View {
     @StateObject private var engine = Engine()
     @State private var errorMsg: String? = nil
     @State private var permissionAsked = false
+    @State private var showCalib = false
+    @State private var mountSummary = MountConfig.load().summary
+    @State private var mountCalibrated = MountConfig.load().calibrated
 
     var body: some View {
         ZStack {
@@ -47,6 +50,23 @@ struct ContentView: View {
                             .frame(width: 180, height: 52)
                     }
                     .buttonStyle(.borderedProminent)
+                    Button {
+                        showCalib = true
+                    } label: {
+                        Label("距离标定（LiDAR）", systemImage: "scope")
+                            .font(.subheadline)
+                    }
+                    .buttonStyle(.bordered)
+                    Text(mountSummary)
+                        .font(.caption2.monospacedDigit())
+                        .foregroundColor(.secondary)
+                    if !mountCalibrated {
+                        Text("尚未标定：测距可能带系统偏差，建议先点上方「距离标定」用 LiDAR 标一次")
+                            .font(.caption2)
+                            .foregroundColor(.orange)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: 320)
+                    }
                     if let e = errorMsg {
                         Text(e).font(.footnote).foregroundColor(.red)
                             .multilineTextAlignment(.center)
@@ -55,6 +75,16 @@ struct ContentView: View {
             }
         }
         .background(Color.black)
+        .sheet(isPresented: $showCalib) {
+            CalibrationView()
+        }
+        .onChange(of: showCalib) { presented in
+            if !presented {
+                let m = MountConfig.load()
+                mountSummary = m.summary
+                mountCalibrated = m.calibrated
+            }
+        }
     }
 
     private func startTapped() {

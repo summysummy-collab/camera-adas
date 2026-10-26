@@ -15,10 +15,14 @@ final class Engine: ObservableObject {
     @Published var gpsSrc = "none"
     @Published var running = false
     @Published var debugLine = ""
+    /// 当前生效的安装几何（标高/俯仰/焦距/比例），用于界面确认
+    @Published var geomLine = ""
 
     let camera = CameraManager()
     let speaker = AlertSpeaker()
     let location = LocationFeed()
+    private let motion = MotionPitch()
+    private var mount = MountConfig.load()
     private var detector: Detector?
     private var tracker = IoUTracker()
     private var lights = LightTracker()
@@ -26,6 +30,10 @@ final class Engine: ObservableObject {
     private var calib = Calib()
     private var lastFrameTs: Double = 0
     private var fpsEma: Double = 0
+    /// 重力实时俯仰（由 MotionPitch 在后台队列写入，processFrame 读取）
+    private var livePitch: Double = .nan
+    private let pitchLock = NSLock()
+    private var lastAppliedPitch: Double = .nan
     /// 当前帧的像素视图（尾灯判据复用，避免同一缓冲重复加锁）
     private var curFrame: FrameBuf? = nil
 
@@ -35,11 +43,12 @@ final class Engine: ObservableObject {
             detector = det
             inferMs = det.lastMs
         }
-        // ★ 关键：先把定标 fit 出来。Calib 是 struct，未 fit 时 fx/fy 还是初值 1，
-        //   任何依赖焦距的计算（红绿灯物理尺寸测距、横向速度 m/s）都会得出垃圾值。
-        calib.fit(Double(CameraManager.WS_W), Double(CameraManager.WS_H))
-
+        // 先启动相机：只有 activeFormat 定了，videoFieldOfView 才是真实视场角
+        try camera.start()
+        // 再用"真实 FOV + 标定安装角"组装 calib
+        applyMount()
         rules = RulesEngine(calib: calib)
+        rules?.th.distScale = mount.distScale
         rules?.tailRatioProvider = { [weak self] box in
             guard let self = self, let fb = self.curFrame else { return nil }
             return redRatio(fb, box)
@@ -48,13 +57,50 @@ final class Engine: ObservableObject {
             self?.processFrame(ws, ts: ts)
         }
         location.request()
-        try camera.start()
+        if mount.pitchAuto {
+            motion.start()
+            motion.onUpdate = { [weak self] p in
+                guard let self = self else { return }
+                self.pitchLock.lock(); self.livePitch = p; self.pitchLock.unlock()
+            }
+        }
         running = true
+    }
+
+    /// 用持久化的标定值 + 相机真实 FOV 组装几何参数。
+    /// 关键：Calib 是 struct，不 fit 的话 fx/fy 还是初值 1，所有基于焦距的计算都会得出垃圾值。
+    private func applyMount() {
+        mount = MountConfig.load()
+        let fov = mount.fovDeg > 1 ? mount.fovDeg : camera.horizontalFOVDeg
+        calib.fov = fov
+        calib.height = mount.heightM
+        let p = motion.value.isFinite ? motion.value : mount.pitchDeg
+        calib.pitch = mount.pitchAuto ? p : mount.pitchDeg
+        // 俯仰是自动测的 → 置信度高，地面法权重可以给足；纯手工猜 → 大幅降权
+        calib.pitchSigmaDeg = mount.pitchAuto ? 0.6 : 2.0
+        calib.refit(Double(CameraManager.WS_W), Double(CameraManager.WS_H))
+        rules?.calib = calib
+        rules?.th.distScale = mount.distScale
+    }
+
+    /// 每帧把重力测得的俯仰角同步进来（变化大于 0.05° 才重算，避免无谓抖动）
+    private func syncPitch() {
+        guard mount.pitchAuto else { return }
+        pitchLock.lock()
+        let p = livePitch
+        pitchLock.unlock()
+        guard p.isFinite else { return }
+        if lastAppliedPitch.isFinite && abs(p - lastAppliedPitch) < 0.05 { return }
+        lastAppliedPitch = p
+        calib.pitch = p
+        calib.refit(Double(CameraManager.WS_W), Double(CameraManager.WS_H))
+        rules?.calib = calib
     }
 
     func stop() {
         camera.stop()
         camera.onFrame = nil
+        motion.stop()
         location.stop()
         running = false
     }
@@ -62,6 +108,9 @@ final class Engine: ObservableObject {
     /// 相机队列上执行（非主线程）
     private func processFrame(_ ws: CVPixelBuffer, ts: Double) {
         guard let detector = detector, let rules = rules else { return }
+
+        // 重力俯仰 → 几何参数（安装姿态变化时自动跟随）
+        syncPitch()
 
         // fps
         if lastFrameTs > 0 {
@@ -93,13 +142,16 @@ final class Engine: ObservableObject {
 
         let fpsNow = fpsEma
         let dbg = String(
-            format: "det %d · tl %d · 灯报 %d · GPS %@ %.1f a%+.1f · 前车 %@ 近%+.1f 加%+.1f 尾%.3f · 车%d",
+            format: "det %d · tl %d · 灯报 %d · GPS %@ %.1f a%+.1f · 前车 %@ 近%+.1f 加%+.1f 尾%.3f · 车%d · 装%.2fm 俯%.1f° fov%.0f",
             dets.count, tl.count, lightReports.count,
             location.ego.ok ? "ok" : "无",
             location.ego.v, location.ego.a,
             st.leadId == nil ? "无" : String(format: "%.0fm", st.leadDist),
             st.leadClosing, st.leadRelAcc, st.tailRatio,
-            st.nTracks)
+            st.nTracks,
+            calib.height, calib.pitch, calib.fov)
+        let geom = String(format: "装高%.2fm 俯仰%.1f° 焦距%.0fpx 比例×%.2f",
+                          calib.height, calib.pitch, calib.fx, mount.distScale)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.scene = st
@@ -109,6 +161,7 @@ final class Engine: ObservableObject {
             self.gpsSpeed = self.location.ego.v
             self.gpsSrc = self.location.ego.src
             self.debugLine = dbg
+            self.geomLine = geom
             if let top = st.alerts.first {
                 self.speaker.speak(top, ts: ts)
             }

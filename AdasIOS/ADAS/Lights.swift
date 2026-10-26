@@ -35,36 +35,37 @@ final class LightTracker {
 
         pendingCount = 0
         for tr in tlTracks {
-            var e = map[tr.tid]
-            if e == nil {
-                e = Entry(id: "L\(tr.tid)")
-                map[tr.tid] = e
-            }
-            e!.last = ts
-            e!.box = tr.box.arr
+            // ★ Entry 是 struct（值类型）：必须"取出 → 改本地副本 → 写回字典"，
+            //   只改副本不写回的话，连续帧计数永远停在 1，CONFIRM_SAME 永远达不到，
+            //   红绿灯就永远不会触发告警（v1.1 的隐性 bug，从 JS 对象语义移植时漏掉的）。
+            var entry = map[tr.tid] ?? Entry(id: "L\(tr.tid)")
+            entry.last = ts
+            entry.box = tr.box.arr
 
             // 框内颜色投票（同色连续计数，异色重计）
             let (color, conf) = classifyLight(img, tr.box.arr)
             if color != .unknown {
-                if color == e!.color { e!.hits += 1 }
-                else { e!.color = color; e!.hits = 1 }
-                e!.conf = conf
+                if color == entry.color { entry.hits += 1 }
+                else { entry.color = color; entry.hits = 1 }
+                entry.conf = conf
             }
 
             // 距离：灯箱物理尺寸法 d = fy·H / 像素高（不依赖俯仰标定，地平线附近也稳）
             let bh = max(3, tr.box.height)
             let d = c.fy * Self.HOUSING_H_M / bh
-            e!.dist = (d >= Self.MIN_DIST_M && d <= Self.MAX_DIST_M) ? d : nil
+            entry.dist = (d >= Self.MIN_DIST_M && d <= Self.MAX_DIST_M) ? d : nil
             let xc = (tr.box.x1 + tr.box.x2) / 2
-            if let dd = e!.dist, c.fx > 1 {
-                e!.xm = (xc - c.cx) * dd / c.fx
+            if let dd = entry.dist, c.fx > 1 {
+                entry.xm = (xc - c.cx) * dd / c.fx
             } else {
-                e!.xm = nil
+                entry.xm = nil
             }
 
-            if e!.hits >= Self.CONFIRM_SAME && e!.color != .unknown {
-                out.append(LightReport(id: e!.id, color: e!.color, conf: e!.conf,
-                                       dist: e!.dist, xm: e!.xm, box: tr.box.arr))
+            map[tr.tid] = entry          // 写回，状态才能跨帧累积
+
+            if entry.hits >= Self.CONFIRM_SAME && entry.color != .unknown {
+                out.append(LightReport(id: entry.id, color: entry.color, conf: entry.conf,
+                                       dist: entry.dist, xm: entry.xm, box: tr.box.arr))
             } else {
                 pendingCount += 1
             }

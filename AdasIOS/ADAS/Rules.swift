@@ -73,8 +73,12 @@ struct SceneState {
 }
 
 final class RulesEngine {
-    let calib: Calib
-    let th: Thresholds
+    /// 安装几何。Engine 会在俯仰角/焦距/安装高变化时整体替换，
+    /// 替换后必须让走廊多边形缓存失效（走廊是用 project() 算出来的，依赖这些参数）。
+    var calib: Calib {
+        didSet { cacheW = -1; cacheH = -1 }
+    }
+    var th: Thresholds
     private var cacheW: Double = 0, cacheH: Double = 0
     private var narrowCache: [Vec2] = []
     private var wideCache: [Vec2] = []

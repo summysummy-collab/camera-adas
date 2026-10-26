@@ -25,6 +25,10 @@
 		301000000000000000000001 /* HudView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201000000000000000000001 /* HudView.swift */; };
 		301100000000000000000001 /* yolov8n.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 201100000000000000000001 /* yolov8n.mlmodel */; };
 		301200000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 201200000000000000000001 /* Assets.xcassets */; };
+		301500000000000000000001 /* MountConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201500000000000000000001 /* MountConfig.swift */; };
+		301600000000000000000001 /* MotionPitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201600000000000000000001 /* MotionPitch.swift */; };
+		301700000000000000000001 /* LiDARCalibrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201700000000000000000001 /* LiDARCalibrator.swift */; };
+		301800000000000000000001 /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201800000000000000000001 /* CalibrationView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +52,10 @@
 		201200000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		201300000000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		201400000000000000000001 /* AdasIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AdasIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		201500000000000000000001 /* MountConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MountConfig.swift; sourceTree = "<group>"; };
+		201600000000000000000001 /* MotionPitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionPitch.swift; sourceTree = "<group>"; };
+		201700000000000000000001 /* LiDARCalibrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiDARCalibrator.swift; sourceTree = "<group>"; };
+		201800000000000000000001 /* CalibrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +105,9 @@
 				200A00000000000000000001 /* Rules.swift */,
 				200B00000000000000000001 /* Thresholds.swift */,
 				200C00000000000000000001 /* Tracker.swift */,
+				201500000000000000000001 /* MountConfig.swift */,
+				201600000000000000000001 /* MotionPitch.swift */,
+				201700000000000000000001 /* LiDARCalibrator.swift */,
 			);
 			path = ADAS;
 			sourceTree = "<group>";
@@ -123,6 +134,7 @@
 			children = (
 				200F00000000000000000001 /* CameraPreview.swift */,
 				201000000000000000000001 /* HudView.swift */,
+				201800000000000000000001 /* CalibrationView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -221,6 +233,10 @@
 				300F00000000000000000001 /* CameraPreview.swift in Sources */,
 				301000000000000000000001 /* HudView.swift in Sources */,
 				301100000000000000000001 /* yolov8n.mlmodel in Sources */,
+				301500000000000000000001 /* MountConfig.swift in Sources */,
+				301600000000000000000001 /* MotionPitch.swift in Sources */,
+				301700000000000000000001 /* LiDARCalibrator.swift in Sources */,
+				301800000000000000000001 /* CalibrationView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

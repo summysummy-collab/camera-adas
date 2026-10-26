@@ -19,6 +19,9 @@ final class CameraManager: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
 
     /// 工作区缓冲（复用，单写单读：相机队列写 → 推理同队列用）
     private(set) var workspace: CVPixelBuffer! = nil
+    /// 当前采集格式的真实水平视场角（度）—— 焦距 fx 的唯一正确来源。
+    /// 之前硬编码 62°，而 iPhone 主摄 16:9 视频的实际 hfov 常在 65–70°，直接造成 8%~13% 的系统性测距偏差。
+    private(set) var horizontalFOVDeg: Double = 62
     /// 缩放目标：指向 workspace 第 PAD 行，高 360 —— vImageScale 只写内容区
     private var scaleDst: vImage_Buffer = vImage_Buffer()
     private var srcBuf: vImage_Buffer = vImage_Buffer()
@@ -48,6 +51,12 @@ final class CameraManager: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
         session.addOutput(dataOutput)
         session.commitConfiguration()
 
+        // 提交配置后 activeFormat 才确定，此时读到的才是真正生效格式的视场角
+        if let dev = (session.inputs.first as? AVCaptureDeviceInput)?.device {
+            let f = Double(dev.activeFormat.videoFieldOfView)
+            if f > 10 && f < 150 { horizontalFOVDeg = f }
+        }
+
         // 输出方向：不做旋转，直接取传感器原生横屏画面（1280x720），与网页版标定一致。
         // videoOrientation 在新 SDK 已废弃/移除，统一用 videoRotationAngle（iOS 17+）：
         // 0° 对应 landscapeRight（原生横屏），90° 才是竖屏。
@@ -59,6 +68,11 @@ final class CameraManager: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
 
         allocateWorkspace()
         session.startRunning()
+        // startRunning 后格式可能再被系统微调，再确认一次
+        if let dev = (session.inputs.first as? AVCaptureDeviceInput)?.device {
+            let f = Double(dev.activeFormat.videoFieldOfView)
+            if f > 10 && f < 150 { horizontalFOVDeg = f }
+        }
     }
 
     func stop() {
