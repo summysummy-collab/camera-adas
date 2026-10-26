@@ -1,0 +1,51 @@
+name: build-ios
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  ipa:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Validate Core ML model numerically (vs ONNX)
+        run: |
+          python3 -m pip install --quiet coremltools onnxruntime pillow
+          python3 tools/validate_model.py
+
+      # 无签名真机构建（Windows 上无法编译 iOS，借 macOS runner 出二进制）
+      - name: Build (device, unsigned)
+        run: |
+          xcodebuild -project AdasIOS.xcodeproj -scheme AdasIOS \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+
+      - name: Package unsigned IPA
+        run: |
+          APP=build/Build/Products/Release-iphoneos/AdasIOS.app
+          ls -la "$(dirname "$APP")"
+          mkdir -p Payload
+          cp -R "$APP" Payload/
+          zip -qry AdasIOS-unsigned.ipa Payload
+          ls -lh AdasIOS-unsigned.ipa
+
+      - name: Upload unsigned IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AdasIOS-unsigned-ipa
+          path: AdasIOS-unsigned.ipa
+
+  # 有签名证书时的本地打包（见 README「生成 IPA」一节）：
+  #   xcodebuild -project AdasIOS.xcodeproj -scheme AdasIOS -configuration Release \
+  #     -destination 'generic/platform=iOS' -allowProvisioningUpdates archive \
+  #     -archivePath AdasIOS.xcarchive
+  #   xcodebuild -exportArchive -archivePath AdasIOS.xcarchive \
+  #     -exportOptionsPlist ExportOptions.plist -exportPath . -allowProvisioningUpdates

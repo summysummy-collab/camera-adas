@@ -1,0 +1,353 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		300100000000000000000001 /* AlertSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200100000000000000000001 /* AlertSpeaker.swift */; };
+		300200000000000000000001 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200200000000000000000001 /* CameraManager.swift */; };
+		300300000000000000000001 /* Calib.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200300000000000000000001 /* Calib.swift */; };
+		300400000000000000000001 /* Detector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200400000000000000000001 /* Detector.swift */; };
+		300500000000000000000001 /* EgoSpeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200500000000000000000001 /* EgoSpeed.swift */; };
+		300600000000000000000001 /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200600000000000000000001 /* Engine.swift */; };
+		300700000000000000000001 /* Lights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200700000000000000000001 /* Lights.swift */; };
+		300800000000000000000001 /* LocationFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200800000000000000000001 /* LocationFeed.swift */; };
+		300900000000000000000001 /* PixelOps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200900000000000000000001 /* PixelOps.swift */; };
+		300A00000000000000000001 /* Rules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200A00000000000000000001 /* Rules.swift */; };
+		300B00000000000000000001 /* Thresholds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200B00000000000000000001 /* Thresholds.swift */; };
+		300C00000000000000000001 /* Tracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200C00000000000000000001 /* Tracker.swift */; };
+		300D00000000000000000001 /* AdasApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200D00000000000000000001 /* AdasApp.swift */; };
+		300E00000000000000000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200E00000000000000000001 /* ContentView.swift */; };
+		300F00000000000000000001 /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200F00000000000000000001 /* CameraPreview.swift */; };
+		301000000000000000000001 /* HudView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201000000000000000000001 /* HudView.swift */; };
+		301100000000000000000001 /* yolov8n.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 201100000000000000000001 /* yolov8n.mlmodel */; };
+		301200000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 201200000000000000000001 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		200100000000000000000001 /* AlertSpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertSpeaker.swift; sourceTree = "<group>"; };
+		200200000000000000000001 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
+		200300000000000000000001 /* Calib.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calib.swift; sourceTree = "<group>"; };
+		200400000000000000000001 /* Detector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Detector.swift; sourceTree = "<group>"; };
+		200500000000000000000001 /* EgoSpeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EgoSpeed.swift; sourceTree = "<group>"; };
+		200600000000000000000001 /* Engine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Engine.swift; sourceTree = "<group>"; };
+		200700000000000000000001 /* Lights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lights.swift; sourceTree = "<group>"; };
+		200800000000000000000001 /* LocationFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationFeed.swift; sourceTree = "<group>"; };
+		200900000000000000000001 /* PixelOps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelOps.swift; sourceTree = "<group>"; };
+		200A00000000000000000001 /* Rules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rules.swift; sourceTree = "<group>"; };
+		200B00000000000000000001 /* Thresholds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thresholds.swift; sourceTree = "<group>"; };
+		200C00000000000000000001 /* Tracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tracker.swift; sourceTree = "<group>"; };
+		200D00000000000000000001 /* AdasApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdasApp.swift; sourceTree = "<group>"; };
+		200E00000000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		200F00000000000000000001 /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
+		201000000000000000000001 /* HudView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HudView.swift; sourceTree = "<group>"; };
+		201100000000000000000001 /* yolov8n.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = yolov8n.mlmodel; sourceTree = "<group>"; };
+		201200000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		201300000000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		201400000000000000000001 /* AdasIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AdasIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		400200000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		100100000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				100200000000000000000001 /* AdasIOS */,
+				100500000000000000000001 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		100200000000000000000001 /* AdasIOS */ = {
+			isa = PBXGroup;
+			children = (
+				100300000000000000000001 /* ADAS */,
+				100400000000000000000001 /* App */,
+				100600000000000000000001 /* UI */,
+				100700000000000000000001 /* Assets */,
+				201200000000000000000001 /* Assets.xcassets */,
+				201300000000000000000001 /* Info.plist */,
+			);
+			path = AdasIOS;
+			sourceTree = "<group>";
+		};
+		100300000000000000000001 /* ADAS */ = {
+			isa = PBXGroup;
+			children = (
+				200100000000000000000001 /* AlertSpeaker.swift */,
+				200200000000000000000001 /* CameraManager.swift */,
+				200300000000000000000001 /* Calib.swift */,
+				200400000000000000000001 /* Detector.swift */,
+				200500000000000000000001 /* EgoSpeed.swift */,
+				200600000000000000000001 /* Engine.swift */,
+				200700000000000000000001 /* Lights.swift */,
+				200800000000000000000001 /* LocationFeed.swift */,
+				200900000000000000000001 /* PixelOps.swift */,
+				200A00000000000000000001 /* Rules.swift */,
+				200B00000000000000000001 /* Thresholds.swift */,
+				200C00000000000000000001 /* Tracker.swift */,
+			);
+			path = ADAS;
+			sourceTree = "<group>";
+		};
+		100400000000000000000001 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				200D00000000000000000001 /* AdasApp.swift */,
+				200E00000000000000000001 /* ContentView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		100500000000000000000001 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				201400000000000000000001 /* AdasIOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		100600000000000000000001 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				200F00000000000000000001 /* CameraPreview.swift */,
+				201000000000000000000001 /* HudView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		100700000000000000000001 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				201100000000000000000001 /* yolov8n.mlmodel */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		500100000000000000000001 /* AdasIOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 800200000000000000000001 /* Build configuration list for PBXNativeTarget "AdasIOS" */;
+			buildPhases = (
+				400100000000000000000001 /* Sources */,
+				400200000000000000000001 /* Frameworks */,
+				400300000000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AdasIOS;
+			productName = AdasIOS;
+			productReference = 201400000000000000000001 /* AdasIOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		600100000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					500100000000000000000001 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+				};
+			};
+			buildConfigurationList = 800100000000000000000001 /* Build configuration list for PBXProject "AdasIOS" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = zh_CN;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				zh_CN,
+				Base,
+			);
+			mainGroup = 100100000000000000000001;
+			productRefGroup = 100500000000000000000001 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				500100000000000000000001 /* AdasIOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		400300000000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				301200000000000000000001 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		400100000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				300100000000000000000001 /* AlertSpeaker.swift in Sources */,
+				300200000000000000000001 /* CameraManager.swift in Sources */,
+				300300000000000000000001 /* Calib.swift in Sources */,
+				300400000000000000000001 /* Detector.swift in Sources */,
+				300500000000000000000001 /* EgoSpeed.swift in Sources */,
+				300600000000000000000001 /* Engine.swift in Sources */,
+				300700000000000000000001 /* Lights.swift in Sources */,
+				300800000000000000000001 /* LocationFeed.swift in Sources */,
+				300900000000000000000001 /* PixelOps.swift in Sources */,
+				300A00000000000000000001 /* Rules.swift in Sources */,
+				300B00000000000000000001 /* Thresholds.swift in Sources */,
+				300C00000000000000000001 /* Tracker.swift in Sources */,
+				300D00000000000000000001 /* AdasApp.swift in Sources */,
+				300E00000000000000000001 /* ContentView.swift in Sources */,
+				300F00000000000000000001 /* CameraPreview.swift in Sources */,
+				301000000000000000000001 /* HudView.swift in Sources */,
+				301100000000000000000001 /* yolov8n.mlmodel in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		700100000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		700200000000000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		700300000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AdasIOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "行车视觉辅助";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.workbuddy.adas;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		700400000000000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AdasIOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "行车视觉辅助";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.workbuddy.adas;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		800100000000000000000001 /* Build configuration list for PBXProject "AdasIOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				700100000000000000000001 /* Debug */,
+				700200000000000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		800200000000000000000001 /* Build configuration list for PBXNativeTarget "AdasIOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				700300000000000000000001 /* Debug */,
+				700400000000000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 600100000000000000000001 /* Project object */;
+}
