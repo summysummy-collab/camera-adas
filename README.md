@@ -95,3 +95,26 @@ xcodebuild -exportArchive -archivePath AdasIOS.xcarchive -exportPath . \
 ```
 
 付费账号（$99/年）签名有效期 1 年，可 TestFlight 分发。
+
+## 已验证：云端出包成功（2026-10-26）
+
+GitHub Actions（macos-14 / Xcode 15.4）已完整跑通：
+
+- `xcodebuild -destination 'generic/platform=iOS'` 无签名真机构建 **通过**
+- Core ML 模型数值校验 **通过**（与 ONNX 检测框 Jaccard 一致）
+- 产物：`AdasIOS-unsigned.ipa`（11.2MB，arm64，含 `yolov8n.mlmodelc`，espresso 后端）
+
+构建过程中修掉的编译问题（供后续参考）：
+
+| 问题 | 修正 |
+|---|---|
+| `@MainActor` 类里 `nonisolated func` 访问隔离属性 | Engine 去掉 `@MainActor`，状态发布用 `DispatchQueue.main.async` |
+| `MLImageConstraint.pixelWidth/pixelHeight` 不存在 | 改用 `pixelsWide/pixelsHigh` |
+| `.pi` 在 Double 上下文歧义 | 写 `Double.pi` |
+| `UnsafeMutablePointer<UInt8>` 赋给 `UnsafeMutableRawPointer` | 显式 `UnsafeMutableRawPointer(...)` |
+| `AVCaptureVideoPreviewLayer.videoOrientation` 在新 SDK 移除 | 改用 `videoRotationAngle`（iOS 17+，带 `#available` 守卫） |
+| `isVideoRotationAngleSupported` 是方法不是属性 | `conn.isVideoRotationAngleSupported(angle)` |
+| macOS runner `pip install` 被 PEP 668 挡住 | 用 `actions/setup-python@v5`（3.11） |
+
+> 相机方向策略：App 锁定横屏，`videoRotationAngle = 0` 即传感器原生横屏（1280×720），
+> vImageScale 把它缩进 640×384 工作区中间 360 行（上下各 12px letterbox），与网页版标定一致。
