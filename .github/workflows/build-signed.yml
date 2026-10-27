@@ -15,6 +15,12 @@ on:
 permissions:
   contents: write
 
+# 同一分支只保留最新一次排队：新提交进来时自动取消旧的 queued/running，
+# 避免多个 run 各占 2 个 macOS 机位互相拖慢（宿主 macOS 池容量紧张时尤其明显）
+concurrency:
+  group: signed-ipa-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ipa:
     # 双队列并行：GitHub hosted macOS 经常容量不足，哪个池先给机器就用哪个出包
