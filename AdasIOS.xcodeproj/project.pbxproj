@@ -29,6 +29,8 @@
 		301600000000000000000001 /* MotionPitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201600000000000000000001 /* MotionPitch.swift */; };
 		301700000000000000000001 /* LiDARCalibrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201700000000000000000001 /* LiDARCalibrator.swift */; };
 		301800000000000000000001 /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201800000000000000000001 /* CalibrationView.swift */; };
+		301900000000000000000001 /* Safety.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201900000000000000000001 /* Safety.swift */; };
+		301A00000000000000000001 /* SituationPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201A00000000000000000001 /* SituationPanel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +58,8 @@
 		201600000000000000000001 /* MotionPitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionPitch.swift; sourceTree = "<group>"; };
 		201700000000000000000001 /* LiDARCalibrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiDARCalibrator.swift; sourceTree = "<group>"; };
 		201800000000000000000001 /* CalibrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationView.swift; sourceTree = "<group>"; };
+		201900000000000000000001 /* Safety.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Safety.swift; sourceTree = "<group>"; };
+		201A00000000000000000001 /* SituationPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SituationPanel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +112,7 @@
 				201500000000000000000001 /* MountConfig.swift */,
 				201600000000000000000001 /* MotionPitch.swift */,
 				201700000000000000000001 /* LiDARCalibrator.swift */,
+				201900000000000000000001 /* Safety.swift */,
 			);
 			path = ADAS;
 			sourceTree = "<group>";
@@ -135,6 +140,7 @@
 				200F00000000000000000001 /* CameraPreview.swift */,
 				201000000000000000000001 /* HudView.swift */,
 				201800000000000000000001 /* CalibrationView.swift */,
+				201A00000000000000000001 /* SituationPanel.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -237,6 +243,8 @@
 				301600000000000000000001 /* MotionPitch.swift in Sources */,
 				301700000000000000000001 /* LiDARCalibrator.swift in Sources */,
 				301800000000000000000001 /* CalibrationView.swift in Sources */,
+				301900000000000000000001 /* Safety.swift in Sources */,
+				301A00000000000000000001 /* SituationPanel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

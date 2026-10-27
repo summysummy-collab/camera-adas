@@ -92,7 +92,7 @@ jobs:
             -derivedDataPath build \
             PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
-            build
+            build 2>&1 | tee "$GITHUB_WORKSPACE/build.log"
 
       # ---------- 4. 嵌入描述文件 + 用证书重签 ----------
       - name: Codesign
@@ -177,3 +177,30 @@ jobs:
           git commit -q -m "signed ipa ${GITHUB_SHA::7} (${GITHUB_RUN_NUMBER})"
           git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "ipa-dist-${{ matrix.os }}:ipa-dist-${{ matrix.os }}"
           echo "已推送 ipa-dist-${{ matrix.os }} 分支"
+
+      # ---------- 7. 回传编译日志（失败时尤其需要：本机 api.github.com 不可达，看不到 Actions 页面） ----------
+      - name: Publish build log
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          L="$GITHUB_WORKSPACE/build.log"
+          [ -f "$L" ] || echo "no build.log (构建未开始)" > "$L"
+          {
+            echo "sha=$GITHUB_SHA"
+            echo "run=$GITHUB_RUN_NUMBER"
+            echo "runner=${{ matrix.os }}"
+            echo "status=${{ job.status }}"
+            echo "---- 错误摘要 ----"
+            grep -E "error:|error :|BUILD FAILED|The following build commands failed" "$L" | head -60 || true
+          } > "$GITHUB_WORKSPACE/log-head.txt"
+          D=$(mktemp -d)
+          cp "$L" "$GITHUB_WORKSPACE/log-head.txt" "$D/"
+          cd "$D"
+          git init -q -b "ci-log-${{ matrix.os }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "log ${GITHUB_SHA::7} (${{ matrix.os }})"
+          git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "ci-log-${{ matrix.os }}:ci-log-${{ matrix.os }}"

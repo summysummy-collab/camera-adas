@@ -19,6 +19,17 @@ struct ContentView: View {
                         gpsOk: engine.gpsOk, gpsSpeed: engine.gpsSpeed, gpsSrc: engine.gpsSrc,
                         debugLine: engine.debugLine)
                     .ignoresSafeArea()
+                // 周边安全态势面板（v1.3）：左下角，一屏看全"前面有什么、多远、几分危险"
+                VStack {
+                    Spacer()
+                    HStack(alignment: .bottom) {
+                        SituationPanel(world: engine.world)
+                        Spacer()
+                    }
+                    .padding(.leading, 12)
+                    .padding(.bottom, 8)
+                }
+                .ignoresSafeArea()
                 // 停止按钮（右上角小圆点，避免行车时误触）
                 VStack {
                     HStack {

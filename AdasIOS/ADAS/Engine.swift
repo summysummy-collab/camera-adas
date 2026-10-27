@@ -17,6 +17,8 @@ final class Engine: ObservableObject {
     @Published var debugLine = ""
     /// 当前生效的安装几何（标高/俯仰/焦距/比例），用于界面确认
     @Published var geomLine = ""
+    /// v1.3 周边安全态势快照（每帧更新，态势面板只读这个）
+    @Published var world = SafetyWorld.empty
 
     let camera = CameraManager()
     let speaker = AlertSpeaker()
@@ -27,6 +29,7 @@ final class Engine: ObservableObject {
     private var tracker = IoUTracker()
     private var lights = LightTracker()
     private var rules: RulesEngine?
+    private let assessor = SafetyAssessor()
     private var calib = Calib()
     private var lastFrameTs: Double = 0
     private var fpsEma: Double = 0
@@ -81,6 +84,7 @@ final class Engine: ObservableObject {
         calib.refit(Double(CameraManager.WS_W), Double(CameraManager.WS_H))
         rules?.calib = calib
         rules?.th.distScale = mount.distScale
+        assessor.th.distScale = mount.distScale
     }
 
     /// 每帧把重力测得的俯仰角同步进来（变化大于 0.05° 才重算，避免无谓抖动）
@@ -139,6 +143,8 @@ final class Engine: ObservableObject {
         let ctx = SceneCtx(w: Double(CameraManager.WS_W), h: Double(CameraManager.WS_H),
                            ego: location.ego, lights: lightReports)
         let st = rules.update(tracks, ts, ctx)
+        // v1.3：同一批跟踪结果再走一遍"世界模型 + 风险评估"（与告警规则并行，互不影响）
+        let wd = assessor.update(tracks, calib, ego: location.ego, ts: ts)
 
         let fpsNow = fpsEma
         let dbg = String(
@@ -162,6 +168,7 @@ final class Engine: ObservableObject {
             self.gpsSrc = self.location.ego.src
             self.debugLine = dbg
             self.geomLine = geom
+            self.world = wd
             if let top = st.alerts.first {
                 self.speaker.speak(top, ts: ts)
             }
