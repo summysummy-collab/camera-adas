@@ -21,7 +21,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, macos-13]
+        # macos-15-intel = Intel(x86_64) 池，容量比 arm64 宽松；arm64 那条腿经常
+        # "not acquired by Runner ... capacity constraints" 排队十几分钟。两条腿都留，
+        # 谁先拿到机器谁出包（各推各的 ipa-dist-<os> 分支，不抢）。
+        os: [macos-15-intel, macos-15]
     runs-on: ${{ matrix.os }}
     env:
       CERT_B64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
