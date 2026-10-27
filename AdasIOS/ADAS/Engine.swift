@@ -181,7 +181,7 @@ final class Engine: ObservableObject {
             self.liveAlert = top
             if let a = top {
                 self.speaker.speak(a, ts: ts)
-                self.fireHaptic(a.level, ts: ts)
+                self.fireHaptic(a.level, ts)
             }
         }
     }
