@@ -9,6 +9,8 @@ struct HudView: View {
     let gpsSpeed: Double
     let gpsSrc: String
     var debugLine: String = ""
+    /// v1.4：规则 + 安全层仲裁后的当前告警（nil 时退回 scene.alerts.first）
+    var liveAlert: Alert? = nil
 
     var body: some View {
         GeometryReader { geo in
@@ -53,15 +55,27 @@ struct HudView: View {
                         .position(x: geo.size.width / 2, y: geo.size.height - 86)
                 }
 
-                // 告警条
-                if let a = scene.alerts.first {
+                // 告警条（v1.4：优先用仲裁结果，规则与安全层不会各说一句）
+                if let a = (liveAlert ?? scene.alerts.first) {
                     Text(a.text)
                         .font(.system(size: 19, weight: .heavy))
                         .foregroundColor(.white)
                         .padding(.horizontal, 14).padding(.vertical, 8)
                         .background(RoundedRectangle(cornerRadius: 8).fill(alertColor(a.level)))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.white.opacity(a.level == .danger ? 0.9 : 0),
+                                        lineWidth: 2)
+                        )
                         .position(x: geo.size.width / 2, y: 46)
                         .transition(.move(edge: .top))
+                }
+
+                // 危险级：画面四周加红边，余光也能看见（不用盯着中间）
+                if let a = liveAlert, a.level == .danger {
+                    Rectangle()
+                        .strokeBorder(Color.red.opacity(0.75), lineWidth: 6)
+                        .ignoresSafeArea()
                 }
 
                 // 状态栏

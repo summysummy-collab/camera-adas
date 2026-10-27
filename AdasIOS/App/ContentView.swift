@@ -17,7 +17,7 @@ struct ContentView: View {
                     .ignoresSafeArea()
                 HudView(scene: engine.scene, fps: engine.fps, inferMs: engine.inferMs,
                         gpsOk: engine.gpsOk, gpsSpeed: engine.gpsSpeed, gpsSrc: engine.gpsSrc,
-                        debugLine: engine.debugLine)
+                        debugLine: engine.debugLine, liveAlert: engine.liveAlert)
                     .ignoresSafeArea()
                 // 周边安全态势面板（v1.3）：左下角，一屏看全"前面有什么、多远、几分危险"
                 VStack {

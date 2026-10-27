@@ -3,6 +3,7 @@ import Foundation
 import CoreVideo
 import CoreML
 import QuartzCore
+import UIKit
 
 /// 主循环编排。注意：本类**不加 @MainActor** —— processFrame 跑在相机队列上，
 /// 只有对外发布状态时才切回主线程（见 processFrame 末尾的 DispatchQueue.main.async）。
@@ -19,6 +20,11 @@ final class Engine: ObservableObject {
     @Published var geomLine = ""
     /// v1.3 周边安全态势快照（每帧更新，态势面板只读这个）
     @Published var world = SafetyWorld.empty
+    /// v1.4 当前该说的那一句（规则 + 安全层仲裁后的结果），HUD 与语音共用
+    @Published var liveAlert: Alert? = nil
+    /// 触觉节流状态（只在主线程读写）
+    private var lastHapticAt: Double = -100
+    private var lastHapticLevel: AlertLevel = .info
 
     let camera = CameraManager()
     let speaker = AlertSpeaker()
@@ -169,9 +175,34 @@ final class Engine: ObservableObject {
             self.debugLine = dbg
             self.geomLine = geom
             self.world = wd
-            if let top = st.alerts.first {
-                self.speaker.speak(top, ts: ts)
+            // v1.4：规则告警 + 安全层告警合并仲裁，只播一条（同级规则优先）
+            let top = AlertArbiter.pick(rules: st.alerts,
+                                        safety: SafetyNarrator.alerts(wd))
+            self.liveAlert = top
+            if let a = top {
+                self.speaker.speak(a, ts: ts)
+                self.fireHaptic(a.level, ts: ts)
             }
+        }
+    }
+
+    // MARK: - 触觉反馈（危险时车厢噪音大，震动比语音更即时）
+    // 必须在主线程调用；同等级在窗口期内不重复震，避免连续几百帧把手机震到没电。
+    private func fireHaptic(_ level: AlertLevel, _ ts: Double) {
+        guard level.rawValue >= AlertLevel.warn.rawValue else { return }
+        let isDanger = (level == .danger)
+        let window = isDanger ? 1.5 : 4.0
+        if ts - lastHapticAt < window && lastHapticLevel.rawValue >= level.rawValue { return }
+        lastHapticAt = ts
+        lastHapticLevel = level
+        if isDanger {
+            let g = UINotificationFeedbackGenerator()
+            g.prepare()
+            g.notificationOccurred(.error)
+        } else {
+            let g = UIImpactFeedbackGenerator(style: .light)
+            g.prepare()
+            g.impactOccurred()
         }
     }
 }
